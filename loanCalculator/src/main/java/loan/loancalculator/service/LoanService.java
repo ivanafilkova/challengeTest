@@ -1,15 +1,19 @@
 package loan.loancalculator.service;
+import javassist.NotFoundException;
 import loan.loancalculator.entity.Loan;
+import loan.loancalculator.entity.Schedule;
 import loan.loancalculator.model.request.AmortizationSchedule;
 import loan.loancalculator.model.request.CreateAmortizationSchedule;
 import loan.loancalculator.model.request.CreateLoanMonthPayment;
 import loan.loancalculator.model.response.AmortizationScheduleAnswer;
 import loan.loancalculator.repository.LoanRepository;
+import loan.loancalculator.repository.ScheduleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.lang.Math;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 @Service
 public class LoanService {
@@ -17,9 +21,14 @@ public class LoanService {
     @Autowired
     private LoanRepository loanRepository;
 
+    @Autowired
+    private ScheduleRepository scheduleRepository;
+
     private static final double MONTHLY_INTEREST_DIVISOR = 12d * 100d;
-    public LoanService(LoanRepository loanRepository) {
+
+    public LoanService(LoanRepository loanRepository, ScheduleRepository scheduleRepository) {
         this.loanRepository = loanRepository;
+        this.scheduleRepository = scheduleRepository;
     }
 
     public Loan getLoanById(Long id){
@@ -81,6 +90,20 @@ public class LoanService {
         return null;
     }
 
+    public Loan deleteLoanById(Long id) {
+            Loan delete_found = loanRepository.findById(id).orElseThrow(NoSuchElementException::new);
+            if (delete_found != null)
+                loanRepository.deleteById(id);
+            return delete_found;
+        }
+
+
+    public List<Schedule> getAllAmortizations() {
+        List<Schedule> result = new ArrayList<>();
+        scheduleRepository.findAll().forEach(result::add);
+        return result;
+    }
+
     /**
      * The first column identifies the payment number.
      * The second column contains the amount of the payment.
@@ -88,7 +111,7 @@ public class LoanService {
      * The fourth column has the current balance.  The total payment amount and
      * the interest paid fields.
      */
-    public List<AmortizationScheduleAnswer> outputAmortizationSchedule(CreateAmortizationSchedule createAmortizationSchedule, AmortizationSchedule amortizationSchedule) {
+    public List<Schedule> outputAmortizationSchedule(CreateAmortizationSchedule createAmortizationSchedule, AmortizationSchedule amortizationSchedule) {
         long amountBorrowed = Math.round(createAmortizationSchedule.getAmount());
         long balance = amountBorrowed;
         int paymentNumber = 0;
@@ -100,9 +123,14 @@ public class LoanService {
         long curMonthlyPrincipalPaid = 0;
         long curBalance =0;
         int initialTermMonths =  createAmortizationSchedule.getYears();
-        List<AmortizationScheduleAnswer> amortizationScheduleAnswers = new ArrayList<>();
+        List<Schedule> schedules = new ArrayList<>();
 
         final int maxNumberOfPayments = initialTermMonths;
+        CreateLoanMonthPayment createLoanMonthPayment = new CreateLoanMonthPayment(Double.toString(amountBorrowed), amortizationSchedule.getApr(), amortizationSchedule.getYears(), "month");
+
+        Loan monthlyLoan = calculateMonthlyLoan (createLoanMonthPayment);
+        double monthlyLoanPayments = monthlyLoan.getMonthlyPayments();
+
         while ((balance > 0) && (paymentNumber <= maxNumberOfPayments)) {
 
             curMonthlyInterest = calculateMonthlyInterest(balance, createAmortizationSchedule.getApr());
@@ -110,11 +138,6 @@ public class LoanService {
             curPayoffAmount = calculateCurrentPayOffAmount(balance,
                     curMonthlyInterest);
 
-
-            CreateLoanMonthPayment createLoanMonthPayment = new CreateLoanMonthPayment(Double.toString(amountBorrowed), amortizationSchedule.getApr(), amortizationSchedule.getYears(), "month");
-
-            Loan monthlyLoan = calculateMonthlyLoan (createLoanMonthPayment);
-            double monthlyLoanPayments = monthlyLoan.getMonthlyPayments();
             curMonthlyPaymentAmount = Math.min((long) monthlyLoanPayments, curPayoffAmount);
 
             // it's possible that the calculated monthlyPaymentAmount is 0,
@@ -136,12 +159,21 @@ public class LoanService {
             totalInterestPaid += curMonthlyInterest;
 
             balance = curBalance;
-            AmortizationScheduleAnswer amortizationScheduleAnswer = new AmortizationScheduleAnswer(paymentNumber, curMonthlyPaymentAmount, curMonthlyPrincipalPaid, curMonthlyInterest, curBalance, totalPayments, totalInterestPaid);
-            amortizationScheduleAnswers.add(amortizationScheduleAnswer);
+            Schedule schedule = new Schedule();
+            schedule.setPaymentNum(paymentNumber);
+            schedule.setCurMonthlyPaymentAmount(curMonthlyPaymentAmount);
+            schedule.setCurMonthlyPrincipalPaid(curMonthlyPrincipalPaid);
+            schedule.setCurMonthlyInterest(curMonthlyInterest);
+            schedule.setCurBalance(curBalance);
+            schedule.setTotalPayments(totalPayments);
+            schedule.setTotalInterestPaid(totalInterestPaid);
+            schedule.setLoan(monthlyLoan);
+            scheduleRepository.save(schedule);
+            schedules.add(schedule);
             paymentNumber++;
 
         }
-        return amortizationScheduleAnswers;
+        return schedules;
     }
 
     public long calculateMonthlyInterest(long balance, double apr) {

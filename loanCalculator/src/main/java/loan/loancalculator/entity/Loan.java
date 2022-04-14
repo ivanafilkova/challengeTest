@@ -1,7 +1,11 @@
 package loan.loancalculator.entity;
 
+import lombok.Data;
 import javax.persistence.*;
+import java.util.LinkedList;
+import java.util.List;
 
+@Data
 @Entity
 @Table(name="loans")
 public class Loan {
@@ -10,19 +14,18 @@ public class Loan {
     @GeneratedValue(strategy=GenerationType.AUTO)
     private long id;
 
-    @Column(name="loanAmaunt")
+    @OneToMany(mappedBy="loan", cascade = CascadeType.REMOVE)
+    private List<Schedule> schedules = new LinkedList<>();
+
     private double loanAmount;
 
-    @Column(name="interestRate")
+
     private double interestRate;
 
-    @Column(name="loanYears")
     private int loanYears;
 
-    @Column(name="monthlyPayments")
     private double monthlyPayments;
 
-    @Column(name="totalInterestPayed")
     private double totalInterestPayed;
 
     public Loan() {
@@ -80,6 +83,14 @@ public class Loan {
         this.totalInterestPayed = totalInterestPayed;
     }
 
+    public List<Schedule> getSchedules() {
+        return schedules;
+    }
+
+    public void setSchedules(List<Schedule> schedules) {
+        this.schedules = schedules;
+    }
+
     @Override
     public String toString() {
         return "Loan{" +
@@ -91,4 +102,5 @@ public class Loan {
                 ", totalInterestPayed=" + totalInterestPayed +
                 '}';
     }
+
 }

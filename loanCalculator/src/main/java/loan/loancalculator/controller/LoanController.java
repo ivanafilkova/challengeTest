@@ -1,6 +1,7 @@
 package loan.loancalculator.controller;
 
 import loan.loancalculator.entity.Loan;
+import loan.loancalculator.entity.Schedule;
 import loan.loancalculator.model.request.AmortizationSchedule;
 import loan.loancalculator.model.request.CreateAmortizationSchedule;
 import loan.loancalculator.model.request.CreateLoanMonthPayment;
@@ -48,6 +49,13 @@ public class LoanController {
         return new LoanMonthlyPaymentAnswer(loanResult);
     }
 
+    @RequestMapping(value = "/loan/{id}", method = RequestMethod.DELETE)
+    public LoanMonthlyPaymentAnswer deleteLoanMonthlyPayment(@PathVariable Long id) {
+        Loan loanResult = loanService.deleteLoanById(id);
+        return new LoanMonthlyPaymentAnswer(loanResult);
+    }
+
+
     @RequestMapping(value = "/loan/all", method = RequestMethod.GET)
     public Iterable<LoanMonthlyPaymentAnswer> getAllLoans(HttpServletRequest request) {
         List<Loan> list = loanService.getAllLoans();
@@ -59,8 +67,17 @@ public class LoanController {
     @RequestMapping(value = "/amortization", method = RequestMethod.POST)
     public List<AmortizationScheduleAnswer> createAmortizationSchedule(@RequestBody AmortizationSchedule model) {
         CreateAmortizationSchedule amortizationSchedule = new CreateAmortizationSchedule(model);
-        List<AmortizationScheduleAnswer> amortizationScheduleResult = loanService.outputAmortizationSchedule(amortizationSchedule, model);
-        return amortizationScheduleResult;
+        List<Schedule> scheduleList = loanService.outputAmortizationSchedule(amortizationSchedule, model);
+        List<AmortizationScheduleAnswer> schedules = scheduleList.stream().map(AmortizationScheduleAnswer::new).collect(Collectors.toList());
+
+        return schedules;
+    }
+
+    @RequestMapping(value = "/amortization/all", method = RequestMethod.GET)
+    public Iterable<AmortizationScheduleAnswer> getAllAmortizations(HttpServletRequest request) {
+        List<Schedule> list = loanService.getAllAmortizations();
+        List<AmortizationScheduleAnswer> amortizationResultList = list.stream().map(AmortizationScheduleAnswer::new).collect(Collectors.toList());
+        return amortizationResultList;
     }
 
 }

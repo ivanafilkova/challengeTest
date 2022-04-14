@@ -1,20 +1,45 @@
-package loan.loancalculator.model.response;
+package loan.loancalculator.entity;
 
-import loan.loancalculator.entity.Schedule;
+import lombok.Data;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
-public class AmortizationScheduleAnswer {
+import javax.persistence.*;
 
-            long id;
-            int paymentNum;
-            double curMonthlyPaymentAmount;
-            double curMonthlyPrincipalPaid;
-            double curMonthlyInterest;
-            double curBalance;
-            double totalPayments;
-            double totalInterestPaid;
+@Data
+@Entity
+@Table(name="schedules")
+public class Schedule {
 
-    public AmortizationScheduleAnswer(long id, int paymentNum, double curMonthlyPaymentAmount, double curMonthlyPrincipalPaid, double curMonthlyInterest, double curBalance, double totalPayments, double totalInterestPaid) {
+    @Id
+    @GeneratedValue(strategy= GenerationType.AUTO)
+    private long id;
+
+
+    @ManyToOne
+    private Loan loan;
+
+    private int paymentNum;
+
+    private double curMonthlyPaymentAmount;
+
+    private double curMonthlyPrincipalPaid;
+
+    private double curMonthlyInterest;
+
+    private double curBalance;
+
+    private double totalPayments;
+
+    private double totalInterestPaid;
+
+    public Schedule() {
+    }
+
+    public Schedule(long id, Loan loan, Loan loan1, int paymentNum, double curMonthlyPaymentAmount, double curMonthlyPrincipalPaid, double curMonthlyInterest, double curBalance, double totalPayments, double totalInterestPaid) {
         this.id = id;
+        this.loan = loan;
+        this.loan = loan1;
         this.paymentNum = paymentNum;
         this.curMonthlyPaymentAmount = curMonthlyPaymentAmount;
         this.curMonthlyPrincipalPaid = curMonthlyPrincipalPaid;
@@ -22,17 +47,6 @@ public class AmortizationScheduleAnswer {
         this.curBalance = curBalance;
         this.totalPayments = totalPayments;
         this.totalInterestPaid = totalInterestPaid;
-    }
-
-    public AmortizationScheduleAnswer(Schedule schedule) {
-        this.id = schedule.getId();
-        this.paymentNum = schedule.getPaymentNum();
-        this.curMonthlyPaymentAmount = schedule.getCurMonthlyPaymentAmount();
-        this.curMonthlyPrincipalPaid = schedule.getCurMonthlyPrincipalPaid();
-        this.curMonthlyInterest = schedule.getCurMonthlyInterest();
-        this.curBalance = schedule.getCurBalance();
-        this.totalPayments = schedule.getTotalPayments();
-        this.totalInterestPaid = schedule.getTotalInterestPaid();
     }
 
     public long getId() {
@@ -57,6 +71,14 @@ public class AmortizationScheduleAnswer {
 
     public void setCurMonthlyPaymentAmount(double curMonthlyPaymentAmount) {
         this.curMonthlyPaymentAmount = curMonthlyPaymentAmount;
+    }
+
+    public double getCurMonthlyPrincipalPaid() {
+        return curMonthlyPrincipalPaid;
+    }
+
+    public void setCurMonthlyPrincipalPaid(double curMonthlyPrincipalPaid) {
+        this.curMonthlyPrincipalPaid = curMonthlyPrincipalPaid;
     }
 
     public double getCurMonthlyInterest() {
@@ -91,11 +113,13 @@ public class AmortizationScheduleAnswer {
         this.totalInterestPaid = totalInterestPaid;
     }
 
-    public double getCurMonthlyPrincipalPaid() {
-        return curMonthlyPrincipalPaid;
+    public Loan getLoan() {
+        return loan;
     }
 
-    public void setCurMonthlyPrincipalPaid(double curMonthlyPrincipalPaid) {
-        this.curMonthlyPrincipalPaid = curMonthlyPrincipalPaid;
+    public void setLoan(Loan loan) {
+        this.loan = loan;
     }
+
+
 }
