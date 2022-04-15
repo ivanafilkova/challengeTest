@@ -2,12 +2,12 @@ package loan.loancalculator.model.request;
 
 public class AmortizationSchedule {
     private String apr;
-    private String years;
+    private String numberOfPayments;
     private String amount;
 
-    public AmortizationSchedule(String apr, String years, String amount) {
+    public AmortizationSchedule(String apr, String numberOfPayments, String amount) {
         this.apr = apr;
-        this.years = years;
+        this.numberOfPayments = numberOfPayments;
         this.amount = amount;
     }
 
@@ -19,12 +19,12 @@ public class AmortizationSchedule {
         this.apr = apr;
     }
 
-    public String getYears() {
-        return years;
+    public String getNumberOfPayments() {
+        return numberOfPayments;
     }
 
-    public void setYears(String years) {
-        this.years = years;
+    public void setNumberOfPayments(String numberOfPayments) {
+        this.numberOfPayments = numberOfPayments;
     }
 
     public String getAmount() {

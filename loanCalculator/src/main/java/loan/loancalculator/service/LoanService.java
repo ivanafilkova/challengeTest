@@ -122,11 +122,11 @@ public class LoanService {
         long curMonthlyPaymentAmount= 0;
         long curMonthlyPrincipalPaid = 0;
         long curBalance =0;
-        int initialTermMonths =  createAmortizationSchedule.getYears();
+        int initialTermMonths =  createAmortizationSchedule.getNumberOfPayments();
         List<Schedule> schedules = new ArrayList<>();
 
         final int maxNumberOfPayments = initialTermMonths;
-        CreateLoanMonthPayment createLoanMonthPayment = new CreateLoanMonthPayment(Double.toString(amountBorrowed), amortizationSchedule.getApr(), amortizationSchedule.getYears(), "month");
+        CreateLoanMonthPayment createLoanMonthPayment = new CreateLoanMonthPayment(Double.toString(amountBorrowed), amortizationSchedule.getApr(), amortizationSchedule.getNumberOfPayments(), "month");
 
         Loan monthlyLoan = calculateMonthlyLoan (createLoanMonthPayment);
         double monthlyLoanPayments = monthlyLoan.getMonthlyPayments();

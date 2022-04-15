@@ -2,18 +2,18 @@ package loan.loancalculator.model.request;
 
 public class CreateAmortizationSchedule {
    private double apr;
-   private int years;
+   private int numberOfPayments;
    private double amount;
 
-    public CreateAmortizationSchedule(double apr, int years, double amount) {
+    public CreateAmortizationSchedule(double apr, int numberOfPayments, double amount) {
         this.apr = apr;
-        this.years = years;
+        this.numberOfPayments = numberOfPayments;
         this.amount = amount;
     }
 
     public CreateAmortizationSchedule(AmortizationSchedule amortizationSchedule) {
         this.apr = Double.parseDouble(amortizationSchedule.getApr());
-        this.years = Integer.parseInt(amortizationSchedule.getYears());
+        this.numberOfPayments = Integer.parseInt(amortizationSchedule.getNumberOfPayments());
         this.amount = Double.parseDouble(amortizationSchedule.getAmount());
     }
 
@@ -25,12 +25,12 @@ public class CreateAmortizationSchedule {
         this.apr = apr;
     }
 
-    public int getYears() {
-        return years;
+    public int getNumberOfPayments() {
+        return numberOfPayments;
     }
 
-    public void setYears(int years) {
-        this.years = years;
+    public void setNumberOfPayments(int numberOfPayments) {
+        this.numberOfPayments = numberOfPayments;
     }
 
     public double getAmount() {

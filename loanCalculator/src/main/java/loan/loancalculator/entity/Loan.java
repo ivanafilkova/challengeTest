@@ -19,7 +19,6 @@ public class Loan {
 
     private double loanAmount;
 
-
     private double interestRate;
 
     private int loanYears;
@@ -27,6 +26,6 @@ public class Loan {
     private double monthlyPayments;
 
     private double totalInterestPayed;
-    
+
 
 }
